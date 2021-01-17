@@ -4,7 +4,6 @@ import { HttpService } from "../../httpService";
 import { Category, Question } from "./types";
 
 interface TriviaState {
-  value: number;
   question: Question | undefined;
   loading: boolean;
   selectedAnswer: string;
@@ -13,7 +12,6 @@ interface TriviaState {
 }
 
 const initialState: TriviaState = {
-  value: 0,
   question: undefined,
   loading: false,
   selectedAnswer: "",
@@ -40,27 +38,10 @@ export const triviaSlice = createSlice({
     setAllCategories: (state, action: PayloadAction<Category[]>) => {
       return { ...state, allCategories: action.payload };
     },
-    increment: (state) => {
-      // Redux Toolkit allows us to write "mutating" logic in reducers. It
-      // doesn't actually mutate the state because it uses the Immer library,
-      // which detects changes to a "draft state" and produces a brand new
-      // immutable state based off those changes
-      state.value += 1;
-    },
-    decrement: (state) => {
-      state.value -= 1;
-    },
-    // Use the PayloadAction type to declare the contents of `action.payload`
-    incrementByAmount: (state, action: PayloadAction<number>) => {
-      state.value += action.payload;
-    },
   },
 });
 
 export const {
-  increment,
-  decrement,
-  incrementByAmount,
   updateQuestion,
   setIsLoading,
   setSelectedAnswer,
@@ -68,21 +49,25 @@ export const {
   setAllCategories,
 } = triviaSlice.actions;
 
-// The function below is called a thunk and allows us to perform async logic. It
-// can be dispatched like a regular action: `dispatch(incrementAsync(10))`. This
-// will call the thunk with the `dispatch` function as the first argument. Async
-// code can then be executed and other actions can be dispatched
-export const incrementAsync = (amount: number): AppThunk => (dispatch) => {
-  setTimeout(() => {
-    dispatch(incrementByAmount(amount));
-  }, 1000);
-};
+function pickCategory(selectedCategories) {
+  var index = Math.floor(Math.random() * selectedCategories.length);
+  console.log("PICK CATEGORY: " + selectedCategories[index].name);
+  return selectedCategories[index].id;
+}
 
-export const fetchQuestion = (): AppThunk => (dispatch) => {
+export const fetchQuestion = (): AppThunk => (dispatch, getState) => {
+  const state = getState();
+
   dispatch(setSelectedAnswer(""));
   dispatch(setIsLoading(true));
+
+  const selectedCategories = selectSelectedCategories(state);
+  const category = selectedCategories.length
+    ? pickCategory(selectedCategories)
+    : null;
+
   HttpService.fetchToken()
-    .then((response) => HttpService.fetchQuestion(response.token))
+    .then((response) => HttpService.fetchQuestion(response.token, category))
     .then((response) => {
       dispatch(setIsLoading(false));
       dispatch(updateQuestion(response.results[0]));
@@ -91,20 +76,37 @@ export const fetchQuestion = (): AppThunk => (dispatch) => {
 
 export const fetchCategories = (): AppThunk => (dispatch) => {
   HttpService.fetchCategories().then((response) => {
-    dispatch(setAllCategories(response.trivia_categories));
+    const categories = response.trivia_categories
+      .sort((a, b) => {
+        const nameA = a.name.toLowerCase();
+        const nameB = b.name.toLowerCase();
+        if (nameA < nameB)
+          //sort string ascending
+          return -1;
+        if (nameA > nameB) return 1;
+        return 0; //default return value (no sorting)
+      })
+      .map((category) => ({ ...category, selected: true }));
+
+    dispatch(setAllCategories(categories));
   });
 };
 
 // The function below is called a selector and allows us to select a value from
 // the state. Selectors can also be defined inline where they're used instead of
 // in the slice file. For example: `useSelector((state: RootState) => state.trivia.value)`
-export const selectCount = (state: RootState) => state.trivia.value;
 export const selectQuestion = (state: RootState) => state.trivia.question;
 export const selectIsLoading = (state: RootState) => state.trivia.loading;
 export const selectSelectedAnswer = (state: RootState) =>
   state.trivia.selectedAnswer;
-export const selectSelectedCategories = (state: RootState) =>
-  state.trivia.selectedCategories;
+export const selectSelectedCategories = (state: RootState) => {
+  const allCategories = selectAllCategories(state);
+  const selectedCategories = allCategories.filter(
+    (category) => category.selected
+  );
+
+  return selectedCategories;
+};
 export const selectAllCategories = (state: RootState) =>
   state.trivia.allCategories;
 

@@ -12,4 +12,5 @@ export type Question = {
 export type Category = {
   id: number;
   name: string;
+  selected: boolean;
 };
