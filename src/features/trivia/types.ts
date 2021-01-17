@@ -8,3 +8,8 @@ export type Question = {
   question: string;
   type: string;
 };
+
+export type Category = {
+  id: number;
+  name: string;
+};
