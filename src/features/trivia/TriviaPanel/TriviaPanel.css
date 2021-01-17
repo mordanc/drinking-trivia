@@ -1,0 +1,45 @@
+.hoverable {
+  padding-left: 1rem;
+  border: 1px solid black;
+  background: rgba(255, 255, 255, 0.08);
+  transition: all 0.3s;
+  cursor: pointer;
+
+  margin: 1rem 0;
+  padding: 1rem;
+}
+
+.hoverable:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.trivia-panel {
+  padding: 1rem;
+  border-radius: 5px;
+  box-shadow: rgba(255, 255, 255, 0.5) 0px 0px 5px 0px;
+  width: 20rem;
+}
+
+.correct-answer {
+  font-weight: 500;
+  color: #00ad00;
+  background-color: #1fff0133;
+}
+
+.incorrect-answer {
+  font-weight: 500;
+  color: #e62807;
+  background-color: #e6280752;
+}
+
+.loading-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+}
+
+@media only screen and (max-width: 600px) {
+  .trivia-panel {
+    box-shadow: none;
+  }
+}
