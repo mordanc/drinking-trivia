@@ -1,80 +1,114 @@
+import { useToast } from "@chakra-ui/react";
 import { useEffect, useRef, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { io } from "socket.io-client";
+import {
+  selectQuestion,
+  setSelectedAnswer,
+  updateQuestion,
+} from "../triviaSlice";
 
 const NEW_CHAT_MESSAGE_EVENT = "newChatMessage"; // Name of the event
 const SOCKET_SERVER_URL = "http://192.168.0.10:5000";
 
-const useChat = (questionObject = {}, userName = "mordan") => {
-  const [messages, setMessages] = useState([]); // Sent and received messages
-  const [hosting, setHosting] = useState(false);
+const useLobby = (
+  questionObject = {},
+  userName = `mordan${Math.floor(Math.random() * 100)}`
+) => {
+  //   const socket = io(SOCKET_SERVER_URL);
   const [connectedUsers, setConnectedUsers] = useState<any[]>([]);
-  const [currentRoom, setCurrentRoom] = useState("");
-
+  const [hosting, setHosting] = useState(false);
   const socketRef = useRef<any>();
 
-  useEffect(() => {
-    // Creates a WebSocket connection
-    socketRef.current = io(SOCKET_SERVER_URL);
+  const currentQuestion = useSelector(selectQuestion);
 
-    socketRef.current.on("connect", () => {
-      socketRef.current.emit("adduser", userName);
+  const toast = useToast();
+
+  const dispatch = useDispatch();
+
+  //   useEffect(() => {
+  //     socketRef.current = io(SOCKET_SERVER_URL);
+  //   });
+
+  const connect = () => {
+    socketRef.current = io(SOCKET_SERVER_URL);
+    socketRef.current.emit("addUser", userName);
+
+    socketRef.current.on("updateChat", (user, msg) => {
+      console.log(msg);
+      toast({
+        title: "Success",
+        description: msg,
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+
+      if (msg.includes("joined")) {
+        setConnectedUsers([...connectedUsers, user]);
+        console.log(connectedUsers);
+      }
     });
 
     socketRef.current.on("hostMessage", (isHosting) => {
       setHosting(isHosting);
     });
 
-    socketRef.current.on("updatechat", (user, msg) => {
-      // should probably store socket id along with userID, and use the socket id to remove ppl
-      if (msg?.includes("joined")) {
-        setConnectedUsers([...connectedUsers, user]);
-      } else {
-        setConnectedUsers(connectedUsers.map((userName) => userName !== user));
+    socketRef.current.on("selectChoice", (answer) => {
+      if (!hosting) {
+        dispatch(setSelectedAnswer(answer));
       }
     });
 
     socketRef.current.on("sendNewQuestion", () => {
-      socketRef.current.emit("updateCurrentQuestion", questionObject);
+      if (hosting) {
+        socketRef.current.emit("updateCurrentQuestion", currentQuestion);
+        console.log("sending question,", currentQuestion);
+      }
     });
 
-    // Destroys the socket reference
-    // when the connection is closed
-    return () => {
-      socketRef.current.disconnect();
-    };
-  }, [userName, hosting]);
+    socketRef.current.on("receiveNewQuestion", (question) => {
+      if (!hosting) {
+        dispatch(updateQuestion(question));
+      }
+    });
+  };
 
-  const joinRoom = (roomName) => {
+  const addUser = () => {
+    socketRef.current.emit("addUser", userName);
+  };
+
+  const switchRoom = (roomName) => {
+    setConnectedUsers([]);
     socketRef.current.emit("switchRoom", roomName);
-    setCurrentRoom(roomName);
+
+    if (!hosting) {
+      socketRef.current.emit("requestCurrentQuestion");
+    }
   };
 
-  const updateCurrentQuestion = (questionObject) => {
-    socketRef.current.emit("updateCurrentQuestion", questionObject);
+  const emitSelectAnswer = (answer) => {
+    socketRef.current.emit("selectChoice", answer);
   };
 
-  const requestCurrentQuestion = () => {
+  const emitNewQuestion = (question) => {
+    socketRef.current.emit("sendNewQuestion", question);
+  };
+
+  const requestNewQuestion = () => {
     socketRef.current.emit("requestCurrentQuestion");
   };
 
-  // Sends a message to the server that
-  // forwards it to all users in the same room
-  const sendMessage = (messageBody) => {
-    socketRef.current.emit(NEW_CHAT_MESSAGE_EVENT, {
-      body: messageBody,
-      senderId: socketRef.current.id,
-    });
-  };
-
   return {
-    messages,
-    sendMessage,
-    hosting,
+    addUser,
+    switchRoom,
+    connect,
     connectedUsers,
-    joinRoom,
-    currentRoom,
-    requestCurrentQuestion,
+    hosting,
+    emitSelectAnswer,
+    emitNewQuestion,
+    requestNewQuestion,
   };
 };
 
-export default useChat;
+export default useLobby;

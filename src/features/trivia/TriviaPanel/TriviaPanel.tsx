@@ -8,6 +8,8 @@ import {
   HStack,
   Spinner,
   Stack,
+  useToast,
+  Text,
 } from "@chakra-ui/react";
 import he from "he";
 import { useDispatch, useSelector } from "react-redux";
@@ -20,8 +22,10 @@ import {
   selectSelectedAnswer,
   setSelectedAnswer,
 } from "../triviaSlice";
+import useLobby from "./useLobby";
 
 import "./TriviaPanel.css";
+import RoomForm from "./RoomForm";
 
 export default function TriviaPanel() {
   const [options, setOptions] = useState<string[]>([]);
@@ -32,15 +36,39 @@ export default function TriviaPanel() {
 
   const dispatch = useDispatch();
 
+  const toast = useToast();
+
   const getNewQuestion = () => {
     dispatch(fetchQuestion());
   };
 
-  const selectAnswer = (answer) => dispatch(setSelectedAnswer(answer));
+  const {
+    switchRoom,
+    connect,
+    connectedUsers,
+    hosting,
+    emitSelectAnswer,
+    emitNewQuestion,
+    requestNewQuestion,
+  } = useLobby();
+
+  const selectAnswer = (answer) => {
+    emitSelectAnswer(answer);
+    dispatch(setSelectedAnswer(answer));
+  };
 
   useEffect(() => {
     getNewQuestion();
+    connect();
   }, []);
+
+  useEffect(() => {
+    if (hosting) {
+      emitNewQuestion(question);
+    } else {
+      requestNewQuestion();
+    }
+  }, [hosting]);
 
   useEffect(() => {
     if (!question) return;
@@ -51,6 +79,10 @@ export default function TriviaPanel() {
     ].sort(() => Math.random() - 0.5);
 
     setOptions(allOptions);
+
+    if (hosting) {
+      emitNewQuestion(question);
+    }
   }, [question]);
 
   const isSelectedAnswer = (answer) => answer === selectedAnswer;
@@ -96,6 +128,16 @@ export default function TriviaPanel() {
             <Flex justifyContent="space-between">
               <Button onClick={() => selectAnswer("")}>Hide Answer</Button>
               <Button onClick={() => getNewQuestion()}>New Question</Button>
+            </Flex>
+
+            <RoomForm joinRoom={switchRoom} />
+
+            <Text>{hosting ? "y" : "n"}</Text>
+
+            <Flex>
+              {connectedUsers.map((user, index) => (
+                <li key={index}>{user}</li>
+              ))}
             </Flex>
           </div>
         </Stack>
