@@ -4,13 +4,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { io } from "socket.io-client";
 import {
   selectQuestion,
+  setIsHost,
   setSelectedAnswer,
   updateQuestion,
 } from "../triviaSlice";
 
 const NEW_CHAT_MESSAGE_EVENT = "newChatMessage"; // Name of the event
 const SOCKET_SERVER_URL = "https://drinking-trivia-backend.herokuapp.com/";
-// const SOCKET_SERVER_URL = "https://drinking-trivia-backend.herokuapp.com/";
+// const SOCKET_SERVER_URL = process.env.BACKEND_URL || "http://localhost:5000";
 
 const useLobby = (userName = `mordan${Math.floor(Math.random() * 100)}`) => {
   const [hosting, setHosting] = useState(false);
@@ -38,6 +39,7 @@ const useLobby = (userName = `mordan${Math.floor(Math.random() * 100)}`) => {
 
     socketRef.current.on("hostMessage", (isHosting) => {
       setHosting(isHosting);
+      dispatch(setIsHost(isHosting));
     });
 
     socketRef.current.on("userJoined", () => {
@@ -71,6 +73,10 @@ const useLobby = (userName = `mordan${Math.floor(Math.random() * 100)}`) => {
   const selectAnswer = (answer) => {
     socketRef?.current?.emit("selectChoice", answer);
     dispatch(setSelectedAnswer(answer));
+  };
+
+  const updateSelectedCategories = (selectedCategories) => {
+    socketRef.current.emit("updateSelectedCategories", selectedCategories);
   };
 
   return {

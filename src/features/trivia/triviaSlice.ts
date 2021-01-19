@@ -9,6 +9,7 @@ interface TriviaState {
   selectedAnswer: string;
   selectedCategories: Category[];
   allCategories: Category[];
+  isHost: boolean;
 }
 
 const initialState: TriviaState = {
@@ -17,6 +18,7 @@ const initialState: TriviaState = {
   selectedAnswer: "",
   selectedCategories: [],
   allCategories: [],
+  isHost: false,
 };
 
 export const triviaSlice = createSlice({
@@ -38,6 +40,9 @@ export const triviaSlice = createSlice({
     setAllCategories: (state, action: PayloadAction<Category[]>) => {
       return { ...state, allCategories: action.payload };
     },
+    setIsHost: (state, action: PayloadAction<boolean>) => {
+      return { ...state, isHost: action.payload };
+    },
   },
 });
 
@@ -47,6 +52,7 @@ export const {
   setSelectedAnswer,
   setSelectedCategories,
   setAllCategories,
+  setIsHost,
 } = triviaSlice.actions;
 
 function pickCategory(selectedCategories) {
@@ -110,5 +116,6 @@ export const selectSelectedCategories = (state: RootState) => {
 };
 export const selectAllCategories = (state: RootState) =>
   state.trivia.allCategories;
+export const selectIsHost = (state: RootState) => state.trivia.isHost;
 
 export default triviaSlice.reducer;

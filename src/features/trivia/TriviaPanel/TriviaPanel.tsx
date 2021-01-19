@@ -8,7 +8,10 @@ import {
   Stack,
   useToast,
   Text,
+  ButtonGroup,
 } from "@chakra-ui/react";
+import { ArrowForwardIcon, PhoneIcon, ViewOffIcon } from "@chakra-ui/icons";
+
 import he from "he";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -109,16 +112,24 @@ export default function TriviaPanel() {
               </div>
             ))}
 
-            <Flex justifyContent="space-between">
-              <Button onClick={() => selectAnswer("")}>Hide Answer</Button>
-              <Button disabled={!hosting} onClick={() => getNewQuestion()}>
+            <Flex justifyContent="space-between" alignItems="center">
+              <Button
+                rightIcon={<ViewOffIcon />}
+                onClick={() => selectAnswer("")}
+              >
+                Hide Answer
+              </Button>
+              <Button
+                disabled={!hosting}
+                colorScheme="blue"
+                onClick={() => getNewQuestion()}
+                rightIcon={<ArrowForwardIcon />}
+              >
                 New Question
               </Button>
             </Flex>
 
             <RoomForm joinRoom={switchRoom} />
-
-            <Text>{hosting ? "y" : "n"}</Text>
 
             {/* <Flex>
               {connectedUsers.map((user, index) => (
