@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from "react";
 import {
   Button,
-  Center,
   Container,
   Flex,
   Heading,
-  HStack,
   Spinner,
   Stack,
   useToast,
@@ -20,7 +18,6 @@ import {
   selectIsLoading,
   selectQuestion,
   selectSelectedAnswer,
-  setSelectedAnswer,
 } from "../triviaSlice";
 import useLobby from "./useLobby";
 
@@ -39,36 +36,27 @@ export default function TriviaPanel() {
   const toast = useToast();
 
   const getNewQuestion = () => {
-    dispatch(fetchQuestion());
+    dispatch(fetchQuestion(sendQuestion));
+    selectAnswer("");
   };
 
   const {
-    switchRoom,
+    selectAnswer,
     connect,
-    connectedUsers,
+    switchRoom,
     hosting,
-    emitSelectAnswer,
-    emitNewQuestion,
-    requestNewQuestion,
+    toggle,
+    sendQuestion,
   } = useLobby();
 
-  const selectAnswer = (answer) => {
-    emitSelectAnswer(answer);
-    dispatch(setSelectedAnswer(answer));
-  };
+  useEffect(() => {
+    sendQuestion(question);
+  }, [toggle]);
 
   useEffect(() => {
     getNewQuestion();
     connect();
   }, []);
-
-  useEffect(() => {
-    if (hosting) {
-      emitNewQuestion(question);
-    } else {
-      requestNewQuestion();
-    }
-  }, [hosting]);
 
   useEffect(() => {
     if (!question) return;
@@ -79,10 +67,6 @@ export default function TriviaPanel() {
     ].sort(() => Math.random() - 0.5);
 
     setOptions(allOptions);
-
-    if (hosting) {
-      emitNewQuestion(question);
-    }
   }, [question]);
 
   const isSelectedAnswer = (answer) => answer === selectedAnswer;
@@ -105,7 +89,7 @@ export default function TriviaPanel() {
       ) : (
         <Stack>
           <Heading>
-            {question ? he.decode(question?.question) : <span></span>}
+            {question ? he.decode(question.question) : <span></span>}
           </Heading>
 
           <Tags
@@ -127,18 +111,20 @@ export default function TriviaPanel() {
 
             <Flex justifyContent="space-between">
               <Button onClick={() => selectAnswer("")}>Hide Answer</Button>
-              <Button onClick={() => getNewQuestion()}>New Question</Button>
+              <Button disabled={!hosting} onClick={() => getNewQuestion()}>
+                New Question
+              </Button>
             </Flex>
 
             <RoomForm joinRoom={switchRoom} />
 
             <Text>{hosting ? "y" : "n"}</Text>
 
-            <Flex>
+            {/* <Flex>
               {connectedUsers.map((user, index) => (
                 <li key={index}>{user}</li>
               ))}
-            </Flex>
+            </Flex> */}
           </div>
         </Stack>
       )}

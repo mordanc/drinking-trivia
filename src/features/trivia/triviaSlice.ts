@@ -55,7 +55,7 @@ function pickCategory(selectedCategories) {
   return selectedCategories[index].id;
 }
 
-export const fetchQuestion = (): AppThunk => (dispatch, getState) => {
+export const fetchQuestion = (emitFn): AppThunk => (dispatch, getState) => {
   const state = getState();
 
   dispatch(setSelectedAnswer(""));
@@ -71,6 +71,7 @@ export const fetchQuestion = (): AppThunk => (dispatch, getState) => {
     .then((response) => {
       dispatch(setIsLoading(false));
       dispatch(updateQuestion(response.results[0]));
+      emitFn(response.results[0]);
     });
 };
 
