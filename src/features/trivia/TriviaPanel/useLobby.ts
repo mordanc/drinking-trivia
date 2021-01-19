@@ -5,15 +5,16 @@ import { io } from "socket.io-client";
 import {
   selectQuestion,
   setIsHost,
+  setRoomName,
   setSelectedAnswer,
   updateQuestion,
 } from "../triviaSlice";
 
 const NEW_CHAT_MESSAGE_EVENT = "newChatMessage"; // Name of the event
-const SOCKET_SERVER_URL = "https://drinking-trivia-backend.herokuapp.com/";
-// const SOCKET_SERVER_URL = process.env.BACKEND_URL || "http://localhost:5000";
+// const SOCKET_SERVER_URL = "https://drinking-trivia-backend.herokuapp.com/";
+const SOCKET_SERVER_URL = process.env.BACKEND_URL || "http://192.168.0.10:5000";
 
-const useLobby = (userName = `mordan${Math.floor(Math.random() * 100)}`) => {
+const useLobby = () => {
   const [hosting, setHosting] = useState(false);
   const [toggle, setToggle] = useState(false);
   const socketRef = useRef<any>();
@@ -28,12 +29,13 @@ const useLobby = (userName = `mordan${Math.floor(Math.random() * 100)}`) => {
     socketRef?.current?.emit("sendingQuestion", question);
   };
 
-  const connect = () => {
+  const connect = (userName = `mordan${Math.floor(Math.random() * 100)}`) => {
     socketRef.current = io(SOCKET_SERVER_URL);
     socketRef.current.emit("addUser", userName);
 
-    socketRef.current.on("switchRoomSuccess", (msg) => {
+    socketRef.current.on("switchRoomSuccess", (roomName, msg) => {
       toast({ status: "success", description: msg });
+      dispatch(setRoomName(roomName));
       console.log("switch success,", msg);
     });
 
@@ -42,11 +44,28 @@ const useLobby = (userName = `mordan${Math.floor(Math.random() * 100)}`) => {
       dispatch(setIsHost(isHosting));
     });
 
-    socketRef.current.on("userJoined", () => {
+    socketRef.current.on("userJoined", ({ id, name }) => {
       console.log("user joined");
-      console.log("sending question to new user", currentQuestion);
 
-      setToggle(!toggle);
+      if (name !== userName) {
+        toast({
+          status: "success",
+          description: `${name} has joined the room`,
+        });
+        setToggle(!toggle);
+      }
+    });
+
+    socketRef.current.on("userLeft", ({ id, name }) => {
+      console.log("user left");
+
+      if (name !== userName) {
+        toast({
+          status: "error",
+          description: `${name} has left the room`,
+        });
+        // setToggle(!toggle);
+      }
     });
 
     socketRef.current.on("receiveQuestion", (question) => {

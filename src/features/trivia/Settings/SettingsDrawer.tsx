@@ -13,16 +13,45 @@ import {
   Flex,
   Switch,
   Center,
+  useBreakpointValue,
+  Accordion,
+  AccordionButton,
+  Text,
+  AccordionIcon,
+  AccordionItem,
+  AccordionPanel,
+  Box,
+  Tab,
+  TabList,
+  TabPanel,
+  TabPanels,
+  Tabs,
+  InputGroup,
+  InputLeftElement,
 } from "@chakra-ui/react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchCategories,
   selectAllCategories,
+  selectConnectedUsers,
+  selectIsHost,
+  selectRoomName,
   setAllCategories,
 } from "../triviaSlice";
+import { PhoneIcon, Search2Icon } from "@chakra-ui/icons";
 
 export default function SettingsDrawer({ isOpen, onClose, btnRef }) {
   const allCategories = useSelector(selectAllCategories);
+  const connectedUsers = useSelector(selectConnectedUsers);
+  const isHost = useSelector(selectIsHost);
+  const roomName = useSelector(selectRoomName);
+
+  const size = useBreakpointValue({
+    sm: "full",
+    md: "full",
+    lg: "lg",
+    xl: "lg",
+  });
 
   const [filteredCategories, setFilteredCategories] = useState(allCategories);
   const [filter, setFilter] = useState("");
@@ -72,41 +101,76 @@ export default function SettingsDrawer({ isOpen, onClose, btnRef }) {
       isOpen={isOpen}
       placement="left"
       onClose={onClose}
-      size={"full"}
+      size={size || "full"}
       // @ts-ignore
       finalFocusRef={btnRef}
     >
       <DrawerOverlay>
         <DrawerContent>
           <DrawerCloseButton />
-          <DrawerHeader>Categories</DrawerHeader>
+          <DrawerHeader>Settings</DrawerHeader>
 
           <DrawerBody>
-            <Input
-              placeholder="Type to filter..."
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-            />
+            {roomName ? (
+              <span>
+                Connected to room: <Text as="i">{roomName}</Text>
+              </span>
+            ) : (
+              "You have not connected to a room yet"
+            )}
 
-            <Center pt="1rem">
-              <Button onClick={() => toggleAllCategories()}>Toggle All</Button>
-            </Center>
+            <Text mb="1rem">{`You are${isHost ? "" : " not"} the host`}</Text>
 
-            <Stack mt="1rem" textAlign="left">
-              {filteredCategories.map((category: any, index) => (
-                <Flex
-                  onClick={() => toggleCategory(category)}
-                  justifyContent="space-between"
-                  key={index}
-                >
-                  {category.name}
-                  <Switch
-                    onChange={() => toggleCategory(category)}
-                    isChecked={category.selected}
-                  />
-                </Flex>
-              ))}
-            </Stack>
+            <Tabs variant="soft-rounded" colorScheme="blue">
+              <TabList>
+                <Tab color="white">User List</Tab>
+                <Tab color="white">Categories</Tab>
+              </TabList>
+              <TabPanels>
+                <TabPanel>
+                  {connectedUsers.length
+                    ? connectedUsers.map((user) => {
+                        <Text>{user}</Text>;
+                      })
+                    : "Looks empty"}
+                </TabPanel>
+                <TabPanel>
+                  <InputGroup>
+                    <InputLeftElement
+                      pointerEvents="none"
+                      children={<Search2Icon color="gray.300" />}
+                    />
+                    <Input
+                      placeholder="Type to filter..."
+                      value={filter}
+                      onChange={(e) => setFilter(e.target.value)}
+                    />
+                  </InputGroup>
+
+                  <Center pt="1rem">
+                    <Button onClick={() => toggleAllCategories()}>
+                      Toggle All
+                    </Button>
+                  </Center>
+
+                  <Stack mt="1rem" textAlign="left">
+                    {filteredCategories.map((category: any, index) => (
+                      <Flex
+                        onClick={() => toggleCategory(category)}
+                        justifyContent="space-between"
+                        key={index}
+                      >
+                        {category.name}
+                        <Switch
+                          onChange={() => toggleCategory(category)}
+                          isChecked={category.selected}
+                        />
+                      </Flex>
+                    ))}
+                  </Stack>
+                </TabPanel>
+              </TabPanels>
+            </Tabs>
           </DrawerBody>
 
           <DrawerFooter>

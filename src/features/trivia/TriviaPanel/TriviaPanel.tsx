@@ -9,6 +9,7 @@ import {
   useToast,
   Text,
   ButtonGroup,
+  useDisclosure,
 } from "@chakra-ui/react";
 import { ArrowForwardIcon, PhoneIcon, ViewOffIcon } from "@chakra-ui/icons";
 
@@ -26,9 +27,11 @@ import useLobby from "./useLobby";
 
 import "./TriviaPanel.css";
 import RoomForm from "./RoomForm";
+import UserModal from "../UserModal/UserModal";
 
 export default function TriviaPanel() {
   const [options, setOptions] = useState<string[]>([]);
+  const [userName, setUserName] = useState("");
   const selectedAnswer = useSelector(selectSelectedAnswer);
 
   const question = useSelector(selectQuestion);
@@ -36,7 +39,7 @@ export default function TriviaPanel() {
 
   const dispatch = useDispatch();
 
-  const toast = useToast();
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const getNewQuestion = () => {
     dispatch(fetchQuestion(sendQuestion));
@@ -52,14 +55,26 @@ export default function TriviaPanel() {
     sendQuestion,
   } = useLobby();
 
+  const closeModal = (name) => {
+    setUserName(name);
+    onClose();
+  };
+
   useEffect(() => {
     sendQuestion(question);
   }, [toggle]);
 
   useEffect(() => {
-    getNewQuestion();
-    connect();
+    if (!userName) {
+      onOpen();
+    }
   }, []);
+
+  useEffect(() => {
+    if (!userName) return;
+    getNewQuestion();
+    connect(userName);
+  }, [userName]);
 
   useEffect(() => {
     if (!question) return;
@@ -91,6 +106,8 @@ export default function TriviaPanel() {
         </div>
       ) : (
         <Stack>
+          <UserModal isOpen={isOpen} onClose={closeModal} />
+
           <Heading>
             {question ? he.decode(question.question) : <span></span>}
           </Heading>
