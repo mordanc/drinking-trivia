@@ -12,6 +12,8 @@ interface TriviaState {
   isHost: boolean;
   roomName: string;
   connectedUsers: any[];
+  userBetAmount: number;
+  isHotseat: boolean;
 }
 
 const initialState: TriviaState = {
@@ -23,6 +25,8 @@ const initialState: TriviaState = {
   isHost: false,
   roomName: "",
   connectedUsers: [],
+  userBetAmount: 0,
+  isHotseat: false,
 };
 
 export const triviaSlice = createSlice({
@@ -50,8 +54,24 @@ export const triviaSlice = createSlice({
     setRoomName: (state, action: PayloadAction<string>) => {
       return { ...state, roomName: action.payload };
     },
-    setConnectedUsers: (state, action: PayloadAction<string>) => {
-      return { ...state, roomName: action.payload };
+    addUserToList: (state, action: PayloadAction<any>) => {
+      const user = action.payload;
+      const newList = [...state.connectedUsers];
+      newList.push(user);
+
+      return { ...state, connectedUsers: newList };
+    },
+    removeUserFromList: (state, action: PayloadAction<any>) => {
+      const user = action.payload;
+      const newList = state.connectedUsers.filter(({ id }) => id !== user.id);
+
+      return { ...state, connectedUsers: newList };
+    },
+    updateUserBetAmount: (state, action: PayloadAction<number>) => {
+      return { ...state, userBetAmount: action.payload };
+    },
+    updateIsHotseat: (state, action: PayloadAction<boolean>) => {
+      return { ...state, isHotseat: action.payload };
     },
   },
 });
@@ -64,7 +84,10 @@ export const {
   setAllCategories,
   setIsHost,
   setRoomName,
-  setConnectedUsers,
+  addUserToList,
+  removeUserFromList,
+  updateUserBetAmount,
+  updateIsHotseat,
 } = triviaSlice.actions;
 
 function pickCategory(selectedCategories) {
@@ -132,5 +155,8 @@ export const selectIsHost = (state: RootState) => state.trivia.isHost;
 export const selectRoomName = (state: RootState) => state.trivia.roomName;
 export const selectConnectedUsers = (state: RootState) =>
   state.trivia.connectedUsers;
+export const selectUserBetAmount = (state: RootState) =>
+  state.trivia.userBetAmount;
+export const selectIsHotseat = (state: RootState) => state.trivia.isHotseat;
 
 export default triviaSlice.reducer;

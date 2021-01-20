@@ -51,14 +51,6 @@ export default function Navbar() {
         aria-label="Search database"
         icon={<HamburgerIcon />}
       />
-      {roomName ? (
-        <span>
-          Connected to: <Text as="i">{roomName}</Text>
-        </span>
-      ) : (
-        ""
-      )}
-      <Text>{isHost ? "You are the host" : "You are not the host"}</Text>
     </Flex>
   );
 }

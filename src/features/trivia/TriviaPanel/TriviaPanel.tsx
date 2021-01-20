@@ -22,24 +22,29 @@ import {
   selectIsLoading,
   selectQuestion,
   selectSelectedAnswer,
+  selectUserBetAmount,
 } from "../triviaSlice";
 import useLobby from "./useLobby";
 
 import "./TriviaPanel.css";
 import RoomForm from "./RoomForm";
 import UserModal from "../UserModal/UserModal";
+import Bets from "../Bets/Bets";
 
 export default function TriviaPanel() {
   const [options, setOptions] = useState<string[]>([]);
   const [userName, setUserName] = useState("");
-  const selectedAnswer = useSelector(selectSelectedAnswer);
 
+  const selectedAnswer = useSelector(selectSelectedAnswer);
   const question = useSelector(selectQuestion);
   const loading = useSelector(selectIsLoading);
+  const betAmount = useSelector(selectUserBetAmount);
 
   const dispatch = useDispatch();
 
   const { isOpen, onOpen, onClose } = useDisclosure();
+
+  const toast = useToast();
 
   const getNewQuestion = () => {
     dispatch(fetchQuestion(sendQuestion));
@@ -59,6 +64,17 @@ export default function TriviaPanel() {
     setUserName(name);
     onClose();
   };
+
+  const isSelectedAnswer = (answer) => answer === selectedAnswer;
+  const isCorrectAnswer = (answer) => answer === question?.correct_answer;
+  const getClassNameForAnswer = (answer) =>
+    isSelectedAnswer(answer)
+      ? isCorrectAnswer(answer)
+        ? "correct-answer"
+        : "incorrect-answer"
+      : isCorrectAnswer(answer) && selectedAnswer && selectedAnswer !== answer
+      ? "correct-answer"
+      : "";
 
   useEffect(() => {
     sendQuestion(question);
@@ -87,16 +103,14 @@ export default function TriviaPanel() {
     setOptions(allOptions);
   }, [question]);
 
-  const isSelectedAnswer = (answer) => answer === selectedAnswer;
-  const isCorrectAnswer = (answer) => answer === question?.correct_answer;
-  const getClassNameForAnswer = (answer) =>
-    isSelectedAnswer(answer)
-      ? isCorrectAnswer(answer)
-        ? "correct-answer"
-        : "incorrect-answer"
-      : isCorrectAnswer(answer) && selectedAnswer && selectedAnswer !== answer
-      ? "correct-answer"
-      : "";
+  useEffect(() => {
+    if (selectedAnswer && !isCorrectAnswer(selectedAnswer)) {
+      toast({
+        status: "warning",
+        description: `Drink for ${betAmount} seconds!`,
+      });
+    }
+  }, [selectedAnswer]);
 
   return (
     <Container className="trivia-panel" maxW="4xl">
@@ -147,13 +161,9 @@ export default function TriviaPanel() {
             </Flex>
 
             <RoomForm joinRoom={switchRoom} />
-
-            {/* <Flex>
-              {connectedUsers.map((user, index) => (
-                <li key={index}>{user}</li>
-              ))}
-            </Flex> */}
           </div>
+
+          {hosting ? "" : <Bets />}
         </Stack>
       )}
     </Container>

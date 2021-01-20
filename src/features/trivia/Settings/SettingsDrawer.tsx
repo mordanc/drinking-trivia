@@ -111,15 +111,21 @@ export default function SettingsDrawer({ isOpen, onClose, btnRef }) {
           <DrawerHeader>Settings</DrawerHeader>
 
           <DrawerBody>
-            {roomName ? (
-              <span>
-                Connected to room: <Text as="i">{roomName}</Text>
-              </span>
-            ) : (
-              "You have not connected to a room yet"
-            )}
+            <Flex alignItems="center">
+              <Text fontWeight="bold" fontSize="xl">
+                Room:&nbsp;
+              </Text>
+              <Text>
+                {roomName ? roomName : "You have not connected to a room yet"}
+              </Text>
+            </Flex>
 
-            <Text mb="1rem">{`You are${isHost ? "" : " not"} the host`}</Text>
+            <Flex alignItems="center" mb="1rem">
+              <Text fontWeight="bold" fontSize="xl">
+                Host:&nbsp;
+              </Text>
+              <Text>{`You are${isHost ? "" : " not"} the host`}</Text>
+            </Flex>
 
             <Tabs variant="soft-rounded" colorScheme="blue">
               <TabList>
@@ -129,9 +135,9 @@ export default function SettingsDrawer({ isOpen, onClose, btnRef }) {
               <TabPanels>
                 <TabPanel>
                   {connectedUsers.length
-                    ? connectedUsers.map((user) => {
-                        <Text>{user}</Text>;
-                      })
+                    ? connectedUsers.map((user) => (
+                        <Text key={user.id}>{user.name}</Text>
+                      ))
                     : "Looks empty"}
                 </TabPanel>
                 <TabPanel>

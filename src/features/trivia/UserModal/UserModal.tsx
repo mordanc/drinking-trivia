@@ -36,11 +36,10 @@ export default function UserModal({ isOpen, onClose }) {
   };
   return (
     <>
-      <Modal isOpen={isOpen} onClose={onClose}>
+      <Modal isOpen={isOpen} onClose={onClose} closeOnOverlayClick={false}>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>Enter a user name</ModalHeader>
-          <ModalCloseButton />
           <ModalBody>
             <form onSubmit={(e) => e.preventDefault()}>
               <VStack>

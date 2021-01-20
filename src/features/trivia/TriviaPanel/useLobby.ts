@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { io } from "socket.io-client";
 import {
+  addUserToList,
+  removeUserFromList,
   selectQuestion,
   setIsHost,
   setRoomName,
@@ -53,6 +55,8 @@ const useLobby = () => {
           description: `${name} has joined the room`,
         });
         setToggle(!toggle);
+        dispatch(addUserToList({ id, name }));
+        console.log("adding user:", { id, name });
       }
     });
 
@@ -65,6 +69,7 @@ const useLobby = () => {
           description: `${name} has left the room`,
         });
         // setToggle(!toggle);
+        dispatch(removeUserFromList({ id, name }));
       }
     });
 
