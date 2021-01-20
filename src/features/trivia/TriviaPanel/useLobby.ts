@@ -15,8 +15,8 @@ import {
 } from "../triviaSlice";
 
 const NEW_CHAT_MESSAGE_EVENT = "newChatMessage"; // Name of the event
-// const SOCKET_SERVER_URL = "https://drinking-trivia-backend.herokuapp.com/";
-const SOCKET_SERVER_URL = process.env.BACKEND_URL || "http://192.168.0.10:5000";
+const SOCKET_SERVER_URL = "https://drinking-trivia-backend.herokuapp.com/";
+// const SOCKET_SERVER_URL = process.env.BACKEND_URL || "http://192.168.0.10:5000";
 
 const useLobby = () => {
   const [hosting, setHosting] = useState(false);
