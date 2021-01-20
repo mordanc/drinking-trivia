@@ -104,7 +104,7 @@ export default function TriviaPanel() {
   }, [question]);
 
   useEffect(() => {
-    if (selectedAnswer && !isCorrectAnswer(selectedAnswer)) {
+    if (selectedAnswer && !isCorrectAnswer(selectedAnswer) && betAmount) {
       toast({
         status: "warning",
         description: `Drink for ${betAmount} seconds!`,

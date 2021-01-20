@@ -3,7 +3,7 @@ import logo from "./logo.svg";
 import "./App.css";
 import TriviaPanel from "./features/trivia/TriviaPanel/TriviaPanel";
 import { ChakraProvider, extendTheme } from "@chakra-ui/react";
-import Navbar from "./features/trivia/Navbar";
+import Navbar from "./features/trivia/Navbar/Navbar";
 
 const config = {
   useSystemColorMode: false,
