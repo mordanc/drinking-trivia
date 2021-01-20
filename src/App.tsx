@@ -1,9 +1,9 @@
 import React from "react";
 import logo from "./logo.svg";
 import "./App.css";
-import TriviaPanel from "./features/trivia/TriviaPanel/TriviaPanel";
+import TriviaPanel from "./components/TriviaPanel/TriviaPanel";
 import { ChakraProvider, extendTheme } from "@chakra-ui/react";
-import Navbar from "./features/trivia/Navbar/Navbar";
+import Navbar from "./components/Navbar/Navbar";
 
 const config = {
   useSystemColorMode: false,

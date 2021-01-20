@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { AppThunk, RootState } from "../../app/store";
-import { HttpService } from "../../httpService";
+import { AppThunk, RootState } from "../app/store";
+import { HttpService } from "../httpService";
 import { Category, Question } from "./types";
 
 interface TriviaState {

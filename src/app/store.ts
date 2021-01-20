@@ -1,5 +1,5 @@
 import { configureStore, ThunkAction, Action } from "@reduxjs/toolkit";
-import triviaReducer from "../features/trivia/triviaSlice";
+import triviaReducer from "../components/triviaSlice";
 
 export const store = configureStore({
   reducer: {

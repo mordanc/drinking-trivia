@@ -1,23 +1,10 @@
 import React from "react";
 import {
-  Drawer,
-  DrawerBody,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerOverlay,
-  DrawerContent,
-  DrawerCloseButton,
-  Button,
-  Input,
   useDisclosure,
-  Text,
   Flex,
-  Container,
   IconButton,
   useBreakpointValue,
 } from "@chakra-ui/react";
-
-import hamburger from "../../app/images/menu-white-48dp.svg";
 
 import SettingsDrawer from "../Settings/SettingsDrawer";
 import { useSelector } from "react-redux";
